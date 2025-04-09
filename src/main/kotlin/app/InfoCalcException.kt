@@ -1,3 +1,7 @@
 package es.iesraprog2425.pruebaes.app
 
-class InfoCalcException(message: String) : Exception(message)
+class InfoCalcException(message: String) : Exception(message) {
+    override fun toString(): String {
+        return message!!
+    }
+}

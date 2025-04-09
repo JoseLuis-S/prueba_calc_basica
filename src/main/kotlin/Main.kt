@@ -1,56 +1,68 @@
 package es.iesraprog2425.pruebaes
 
 import es.iesraprog2425.pruebaes.app.Calculadora
+import es.iesraprog2425.pruebaes.model.Operacion
+import es.iesraprog2425.pruebaes.model.Operadores
+import es.iesraprog2425.pruebaes.serializable.toSerializable
 import es.iesraprog2425.pruebaes.ui.Consola
+import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-/*
-fun main() {
-    val scanner = Scanner(System.`in`)
+fun Double.redondearDosDecimales(): Double = String.format("%.2f", this).replace(",", ".").toDouble()
 
-    println("Introduce el primer número:")
-    val numero1 = scanner.nextDouble()
-    println("Introduce el operador (+, -, *, /):")
-    val operador = scanner.next()[0]
-    println("Introduce el segundo número:")
-    val numero2 = scanner.nextDouble()
-
-    val resultado = when (operador) {
-        '+' -> numero1 + numero2
-        '-' -> numero1 - numero2
-        '*' -> numero1 * numero2
-        '/' -> numero1 / numero2
-        else -> "Operador no válido"
-    }
-
-    println("Resultado: $resultado")
-}
-*/
-
-fun main() {
-    Calculadora(Consola()).iniciar()
+fun formatearFecha(fecha: String): DateTimeFormatter {
+    return DateTimeFormatter.ofPattern("yyyy/MM/dd/HH/mm/SS")
 }
 
-
-/*
-import java.util.*
-
 fun main() {
-    val scanner = Scanner(System.`in`)
+    val ui = Consola()
+    val calculadora = Calculadora(ui)
 
-    val numLineas = scanner.nextInt()
-    scanner.nextLine() // Limpia el salto de línea pendiente
+    val argEntrada = ui.pedirInfo("Introduce ruta o ruta y operadores (separado por espacios): ").split(" ")
 
-    var resultado = 1
-
-    for (i in 1..numLineas) {
-        var suma = 0
-        while (scanner.hasNextInt()) {
-            suma += scanner.nextInt()
+    if (argEntrada.isEmpty()) {
+        val ruta = File("./log")
+        if (ruta.exists()) {
+            val ficherosReciente = ruta.listFiles()
+            if (ficherosReciente.isNotEmpty()) {
+                ficherosReciente[0].forEachLine { ui.mostrar(it) }
+            }
+        } else {
+            ruta.mkdir()
+            println("Ruta ${ruta.absolutePath} creada")
         }
-        resultado *= suma
-        if (scanner.hasNextLine()) scanner.nextLine() // pasar a la siguiente línea
+    } else if (argEntrada.size == 1) {
+        val ruta = File("./${argEntrada[0]}")
+        if (ruta.exists()) {
+            val ficherosReciente = ruta.listFiles()
+            if (ficherosReciente.isNotEmpty()) {
+                ficherosReciente[0].forEachLine { ui.mostrar(it) }
+            }
+        } else {
+            ruta.mkdir()
+            ui.mostrar("Ruta ${ruta.absolutePath} creada")
+        }
+    } else if (argEntrada.size == 4) {
+        val ruta = File("./${argEntrada[0]}")
+        if (!ruta.exists()) ruta.mkdir()
+        try {
+            val num1 = argEntrada[1].toDouble().redondearDosDecimales()
+            val num2 = argEntrada[3].toDouble().redondearDosDecimales()
+            val operador = Operadores.getOperador(argEntrada[2].firstOrNull())
+            val resultado = calculadora.realizarCalculo(num1, operador, num2)
+            val fechaActual = LocalDateTime.now()
+            val rutaArchivo = "./${argEntrada[0]}/log${formatearFecha(fechaActual.toString())}.txt"
+            if (resultado::class.simpleName == "InfoCalcExcetion") {
+                File(rutaArchivo).writeText(resultado.toString())
+            } else {
+                val operacion = Operacion(num1, num2, operador!!, resultado)
+                File(rutaArchivo).writeText(operacion.toSerializable())
+            }
+        } catch (e: Exception) {
+            ui.mostrarError("$e")
+        }
+    } else {
+        ui.mostrarError("Entrada no valida")
     }
-
-    println(resultado)
 }
-*/
