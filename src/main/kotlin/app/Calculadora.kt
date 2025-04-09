@@ -38,5 +38,4 @@ class Calculadora(private val ui: IEntradaSalida) {
         } while (ui.preguntar())
         ui.limpiarPantalla()
     }
-
 }
