@@ -48,5 +48,9 @@ class Consola : IEntradaSalida {
         }
     }
 
+    override fun pausa() {
+        println("Pulsa ENTER para continuar...")
+        scanner.nextLine()
+    }
 }
 

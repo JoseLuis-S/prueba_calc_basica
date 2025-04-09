@@ -8,4 +8,5 @@ interface IEntradaSalida {
     fun pedirEntero(msj: String = ""): Int?
     fun preguntar(msj: String = "¿Deseas intentarlo de nuevo? (s/n): "): Boolean
     fun limpiarPantalla(numSaltos: Int = 20)
+    fun pausa()
 }
