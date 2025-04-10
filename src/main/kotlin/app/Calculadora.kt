@@ -1,7 +1,10 @@
 package es.iesraprog2425.pruebaes.app
 
+import es.iesraprog2425.pruebaes.model.Operacion
 import es.iesraprog2425.pruebaes.model.Operadores
+import es.iesraprog2425.pruebaes.serializable.toSerializable
 import es.iesraprog2425.pruebaes.ui.IEntradaSalida
+import java.io.File
 
 class Calculadora(
     private val ui: IEntradaSalida,
@@ -26,19 +29,23 @@ class Calculadora(
             null -> throw InfoCalcException("Operador no valido")
         }
 
-    fun iniciar() {
-        do {
-            try {
-                ui.limpiarPantalla()
-                val (numero1, operador, numero2) = pedirInfo()
-                val resultado = realizarCalculo(numero1, operador, numero2)
-                ui.mostrar("Resultado: %.2f".format(resultado))
-            } catch (e: NumberFormatException) {
-                ui.mostrarError(e.message ?: "Se ha producido un error!")
-            } catch (e: InfoCalcException) {
-                ui.mostrarError("$e")
+    fun iniciar(archivo: File) {
+        try {
+            ui.limpiarPantalla()
+            val (numero1, operador, numero2) = pedirInfo()
+            val resultado = realizarCalculo(numero1, operador, numero2)
+            ui.mostrar("Resultado: %.2f".format(resultado))
+            if (resultado::class.simpleName == "InfoCalcExcetion") {
+                archivo.writeText(resultado.toString())
+            } else {
+                val operacion = Operacion(numero1, numero2, operador, resultado)
+                archivo.writeText(operacion.toSerializable())
             }
-        } while (ui.preguntar())
+        } catch (e: NumberFormatException) {
+            ui.mostrarError(e.message ?: "Se ha producido un error!")
+        } catch (e: InfoCalcException) {
+            ui.mostrarError("$e")
+        }
         ui.limpiarPantalla()
     }
 }
